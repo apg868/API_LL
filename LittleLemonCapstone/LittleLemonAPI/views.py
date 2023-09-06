@@ -20,10 +20,10 @@ class MenuItemsView(generics.ListCreateAPIView):
 
 
 @api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated]   )
 def menu_items(request):
     if(request.method=='GET'):
-        if request.user.groups.filter(name='Customer').exists():
+        if(request.user.groups.filter(name='Customer').exists() or request.user.groups.filter(name='Delivery Crew').exists()) or request.user.groups.filter(name='Manager').exists():
             items = MenuItem.objects.select_related('category')
             category_hold = request.query_params.get('category')
             price_hold = request.query_params.get('to_price')
@@ -31,9 +31,12 @@ def menu_items(request):
                 items = items.filter(category__title=category_hold)
             if price_hold:
                 items = items.filter(price__lte=price_hold)
-            serializedreturn = MenuItemSerializer(items, many=True)
-            return Response(serializedreturn)
+            serializedReturn = MenuItemSerializer(items, many=True)
+            serializedReturnData = serializedReturn.data
+            return Response(serializedReturnData)
         else:
             return Response({'message': 'You do not have the required permissions.'}, status=status.HTTP_403_FORBIDDEN)
 
     return Response({'message': 'Unsupported method.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+def menu_item
